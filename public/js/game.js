@@ -5,44 +5,18 @@ window.onload = function() {
         update: update
     });
 
+    var player, //our player
+        players = {}, //this will hold the list of players
+        sock, //this will be player's ws connection
+        label,
+        style = {
+            font: "12px Arial",
+            fill: "#ffffff"
+        }, //styling players labels a bit
+        ip = "192.168.1.13"; //ip of our Go server
+
     function preload() {
         game.load.spritesheet('char', 'images/char01.png', 32, 48);
-    }
-
-    var player;
-    var players = {};
-    var sock;
-    var label;
-    var style = {
-        font: "12px Arial",
-        fill: "#ffffff"
-    };
-    var ip = "192.168.1.13";
-
-    function spawn(m) {
-        var label = m.Id.match(/(^\w*)-/i)[1];
-        var p = game.add.sprite(m.X, m.Y, 'char');
-        p.animations.add('down', [0, 1, 2], 10);
-        p.animations.add('left', [12, 13, 14], 10);
-        p.animations.add('right', [24, 25, 26], 10);
-        p.animations.add('up', [36, 37, 38], 10);
-        p.label = game.add.text(m.X, m.Y - 10, label, style);
-        return p;
-    }
-
-    function uPosition(m) {
-        if (players[m.Id].x > m.X) {
-            players[m.Id].animations.play('left');
-        } else if (players[m.Id].x < m.X) {
-            players[m.Id].animations.play('right');
-        } else if (players[m.Id].y > m.Y) {
-            players[m.Id].animations.play('up');
-        } else {
-            players[m.Id].animations.play('down');
-        }
-        players[m.Id].x = players[m.Id].label.x = m.X;
-        players[m.Id].y = m.Y;
-        players[m.Id].label.y = m.Y - 10;
     }
 
     function create() {
@@ -57,6 +31,7 @@ window.onload = function() {
 
         player.body.collideWorldBounds = true;
 
+        //create a new ws connection and send our position to others
         sock = new WebSocket("ws://" + ip + ":3000/ws");
         sock.onopen = function() {
             var pos = JSON.stringify({
@@ -66,6 +41,8 @@ window.onload = function() {
             sock.send(pos);
         };
 
+        // when we receive a message we spawn, destroy or update a player's
+        // position depending on the message's content
         sock.onmessage = function(message) {
             var m = JSON.parse(message.data);
             if (m.New) {
@@ -110,5 +87,31 @@ window.onload = function() {
             });
             sock.send(pos);
         }
+    }
+
+    function spawn(m) {
+        var label = m.Id.match(/(^\w*)-/i)[1];
+        var p = game.add.sprite(m.X, m.Y, 'char');
+        p.animations.add('down', [0, 1, 2], 10);
+        p.animations.add('left', [12, 13, 14], 10);
+        p.animations.add('right', [24, 25, 26], 10);
+        p.animations.add('up', [36, 37, 38], 10);
+        p.label = game.add.text(m.X, m.Y - 10, label, style);
+        return p;
+    }
+
+    function uPosition(m) {
+        if (players[m.Id].x > m.X) {
+            players[m.Id].animations.play('left');
+        } else if (players[m.Id].x < m.X) {
+            players[m.Id].animations.play('right');
+        } else if (players[m.Id].y > m.Y) {
+            players[m.Id].animations.play('up');
+        } else {
+            players[m.Id].animations.play('down');
+        }
+        players[m.Id].x = players[m.Id].label.x = m.X;
+        players[m.Id].y = m.Y;
+        players[m.Id].label.y = m.Y - 10;
     }
 };
