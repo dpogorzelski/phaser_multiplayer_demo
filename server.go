@@ -8,35 +8,31 @@ import (
 	"net/http"
 )
 
-// a slice of *Players which will store the list of connected players
-var Players = make([]*Player, 0)
-
-type Player struct {
-	Y      int             // Y position of the player
-	X      int             // X position
-	Id     string          // a unique id to identify the player by the frontend
-	Socket *websocket.Conn // pointer to websocket connection to the player
-}
-
-// each time the position of a player changes the backend will receive
-// one of these
 type Message struct {
 	Y   int    // current Y position
 	X   int    // as above
 	Id  string // the id of the player that sent the message
 	New bool   // true if this player just connected so we know when to
-	// spawn a new sprite on the screens of other players. for all subsequent
-	// messages is false
-	Online bool // if the player is no longer connected we let the frontend
-	// know to remove the sprite
+	// spawn a new sprite on the screens of the other players. for all subsequent
+	// messages it's false
+	Online bool // true if the player is no longer connected so the frontend
+	// will remove it's sprite
+}
+
+type Player struct {
+	Y      int             // Y position of the player
+	X      int             // X position
+	Id     string          // a unique id to identify the player by the frontend
+	Socket *websocket.Conn // websocket connection of the player
 }
 
 func (p *Player) position(new bool) Message {
 	return Message{X: p.X, Y: p.Y, Id: p.Id, New: new, Online: true}
 }
 
-// the core. it upgrades connections to websocket and handles the exchange of
-// players positions
+// a slice of *Players which will store the list of connected players
+var Players = make([]*Player, 0)
+
 func remoteHandler(res http.ResponseWriter, req *http.Request) {
 	var err error
 
@@ -64,7 +60,7 @@ func remoteHandler(res http.ResponseWriter, req *http.Request) {
 	for {
 		// if a network error occurs (aka someone closed the game) we let
 		// the other players know to despawn his sprite (Online: false) and
-		// remove him from the slice so no further updates will be sent to him
+		// remove him from the slice so no further updates will be sent
 		if err = player.Socket.ReadJSON(&player); err != nil {
 			log.Println("Player Disconnected waiting", err.Error())
 			for i, p := range Players {
@@ -90,7 +86,6 @@ func remoteHandler(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
-// it all starts here
 func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/ws", remoteHandler)
