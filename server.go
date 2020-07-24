@@ -1,11 +1,12 @@
 package main
 
 import (
-	"code.google.com/p/go-uuid/uuid"
-	"github.com/gorilla/mux"
-	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
+
+	"github.com/gorilla/mux"
+	"github.com/gorilla/websocket"
+	"github.com/pborman/uuid"
 )
 
 type Message struct {
