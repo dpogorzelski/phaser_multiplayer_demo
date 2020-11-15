@@ -8,7 +8,6 @@ window.onload = function () {
   var player, //our player
     players = {}, //this will hold the list of players
     sock, //this will be player's ws connection
-    label,
     style = {
       font: "12px Arial",
       fill: "#ffffff",
@@ -44,14 +43,17 @@ window.onload = function () {
     // when we receive a message we spawn, destroy or update a player's
     // position depending on the message's content
     sock.onmessage = function (message) {
-      var m = JSON.parse(message.data);
-      if (m.New) {
-        players[m.Id] = spawn(m);
-      } else if (m.Online === false) {
-        players[m.Id].label.destroy();
-        players[m.Id].destroy();
+      var p = JSON.parse(message.data);
+      if (!(p.ID in players)) {
+        players[p.ID] = spawn(p);
+        uPosition(p);
+      }
+
+      if (p.Online === false) {
+        players[p.ID].label.destroy();
+        players[p.ID].destroy();
       } else {
-        uPosition(m);
+        uPosition(p);
       }
     };
   }
@@ -88,29 +90,29 @@ window.onload = function () {
     }
   }
 
-  function spawn(m) {
-    var label = m.Id.match(/(^\w*)-/i)[1];
-    var p = game.add.sprite(m.X, m.Y, "char");
+  function spawn(p) {
+    var label = p.ID.match(/(^\w*)-/i)[1];
+    var p = game.add.sprite(p.X, p.Y, "char");
     p.animations.add("down", [0, 1, 2], 10);
     p.animations.add("left", [12, 13, 14], 10);
     p.animations.add("right", [24, 25, 26], 10);
     p.animations.add("up", [36, 37, 38], 10);
-    p.label = game.add.text(m.X, m.Y - 10, label, style);
+    p.label = game.add.text(p.X, p.Y - 10, label, style);
     return p;
   }
 
-  function uPosition(m) {
-    if (players[m.Id].x > m.X) {
-      players[m.Id].animations.play("left");
-    } else if (players[m.Id].x < m.X) {
-      players[m.Id].animations.play("right");
-    } else if (players[m.Id].y > m.Y) {
-      players[m.Id].animations.play("up");
+  function uPosition(p) {
+    if (players[p.ID].x > p.X) {
+      players[p.ID].animations.play("left");
+    } else if (players[p.ID].x < p.X) {
+      players[p.ID].animations.play("right");
+    } else if (players[p.ID].y > p.Y) {
+      players[p.ID].animations.play("up");
     } else {
-      players[m.Id].animations.play("down");
+      players[p.ID].animations.play("down");
     }
-    players[m.Id].x = players[m.Id].label.x = m.X;
-    players[m.Id].y = m.Y;
-    players[m.Id].label.y = m.Y - 10;
+    players[p.ID].x = players[p.ID].label.x = p.X;
+    players[p.ID].y = p.Y;
+    players[p.ID].label.y = p.Y - 10;
   }
 };
