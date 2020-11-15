@@ -1,5 +1,5 @@
 # What is this
-A basic demonstration of how to build a multi-player game with Phaser
+A basic demonstration of how to build a multi-player game with [Phaser](https://phaser.io/)
 
 # How to use
 
