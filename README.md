@@ -1,3 +1,6 @@
+# What is this
+A basic demonstration of how to build a multi-player game with Phaser
+
 # How to use
 
 ```
