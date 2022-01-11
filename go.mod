@@ -1,4 +1,4 @@
-module github.com/dawidpogorzelski/phaser_multiplayer_demo
+module github.com/dpogorzelski/phaser_multiplayer_demo
 
 go 1.15
 
