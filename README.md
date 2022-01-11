@@ -4,7 +4,7 @@ A basic demonstration of how to build a multi-player game with [Phaser](https://
 # How to use
 
 ```
-git clone https://github.com/dawidpogorzelski/phaser_multiplayer_demo.git
+git clone https://github.com/dpogorzelski/phaser_multiplayer_demo.git
 cd phaser_multiplayer_demo
 go get
 go run server.go
